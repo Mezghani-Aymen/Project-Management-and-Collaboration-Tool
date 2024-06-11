@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongo-container
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_URL: ${MONGO_URI}
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nest_container
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./backend:/app
+      - ./.env:/app/.env # Mount the .env file from the root directory
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=${MONGO_URI}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react_container
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - ./.env:/app/.env # Mount the .env file from the root directory
+    depends_on:
+      - backend
